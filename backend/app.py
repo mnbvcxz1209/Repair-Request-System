@@ -7,7 +7,7 @@ IC Frontend Backend (Flask)
   * 使用者輸入：{Nickname}您好 → 回傳表單格式
   * 使用者依格式填寫後 → 檢查「學號/工號」是否重複，若不重複則寫入 DB 並綁定 LINE userId
 - Web/API 端可依「姓名」或「學號/工號」查到 line_user_id 後推播訊息
-- 保留你原本的 owners/work-items/comments/auth API
+
 """
 
 from __future__ import annotations
@@ -37,13 +37,13 @@ LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "").strip()
 EMAIL_RE = re.compile(r"^\S+@\S+\.\S+$")
 POWER_AUTOMATE_URL = os.environ.get("POWER_AUTOMATE_URL")
 def get_sharepoint_access_token():
-    token_url = "https://login.microsoftonline.com/<TENANT_ID>/oauth2/v2.0/token"
+    token_url = ""
 
     data = {
         "client_id": "<CLIENT_ID>",
         "client_secret": "<CLIENT_SECRET>",
         "grant_type": "client_credentials",
-        "scope": "https://graph.microsoft.com/.default"
+        "scope": ""
     }
 
     resp = requests.post(token_url, data=data)
@@ -69,8 +69,8 @@ def get_sharepoint_access_token():
 # -------------------------
 def get_conn():
     return pymysql.connect(
-        host=os.getenv("DB_HOST", "127.0.0.1"),
-        port=int(os.getenv("DB_PORT", "3306")),
+        host=os.getenv("DB_HOST", ""),
+        port=int(os.getenv("DB_PORT", "")),
         user=os.getenv("DB_USER", "root"),
         password=os.getenv("DB_PASSWORD", ""),
         database=os.getenv("DB_NAME", "ic_system"),
@@ -81,11 +81,7 @@ def get_conn():
 
 
 def ensure_tables() -> None:
-    """
-    建議：用 migration/SQL 檔建立
-    但為了「直接可用」，啟動時也會確保 line_users 存在
-    """
-    conn = get_conn()
+     conn = get_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
@@ -149,15 +145,7 @@ def create_sharepoint_item(
 
     return resp.json()
 
-# -------------------------
-# API token guard
-# -------------------------
-def require_api_token() -> bool:
-    if not API_AUTH_TOKEN:
-        # 沒設定就不強制（方便先跑起來）
-        return True
-    auth = request.headers.get("Authorization", "")
-    return auth == f"Bearer {API_AUTH_TOKEN}"
+
 
 
 # -------------------------
@@ -176,7 +164,7 @@ def push_line_message(to_user_id: str, text: str):
     if not LINE_CHANNEL_ACCESS_TOKEN:
         raise RuntimeError("LINE_CHANNEL_ACCESS_TOKEN is not set")
 
-    url = "https://api.line.me/v2/bot/message/push"
+    url = ""
     headers = {
         "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}",
         "Content-Type": "application/json"
@@ -187,7 +175,6 @@ def push_line_message(to_user_id: str, text: str):
     }
     r = requests.post(url, headers=headers, json=payload, timeout=10)
 
-    # 重要：印出來方便你 debug
     print("[LINE] push status =", r.status_code)
     print("[LINE] push resp   =", r.text)
 
@@ -201,7 +188,7 @@ def line_push_text(to_user_id: str, text: str) -> None:
     if not to_user_id:
         raise RuntimeError("missing to_user_id")
 
-    url = "https://api.line.me/v2/bot/message/push"
+    url = ""
     headers = {
         "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}",
         "Content-Type": "application/json",
@@ -218,7 +205,7 @@ def reply_text(reply_token: Optional[str], text: str) -> None:
     if not LINE_CHANNEL_ACCESS_TOKEN:
         return
 
-    url = "https://api.line.me/v2/bot/message/reply"
+    url = ""
     headers = {
         "Authorization": f"Bearer {LINE_CHANNEL_ACCESS_TOKEN}",
         "Content-Type": "application/json",
@@ -230,7 +217,7 @@ def reply_text(reply_token: Optional[str], text: str) -> None:
         pass
 @app.post("/api/push")
 def api_push():
-    # 1) 驗證 API token（避免外人亂推播）
+    # 1) 驗證 API token
     if not require_api_token():
         return jsonify({"ok": False, "error": "unauthorized"}), 401
 
@@ -405,14 +392,14 @@ def health():
 
 
 # -------------------------
-# Owners (你原本的 owners 列表：從 owner_contacts)
+# Owners 
 # -------------------------
 @app.get("/api/owners")
 def owners():
     conn = get_conn()
     try:
         with conn.cursor() as cur:
-            # 多帶 line_user_id（方便前端顯示是否綁定）
+            
             cur.execute(
                 "SELECT id, name, sales, ext, line_user_id FROM owner_contacts ORDER BY id ASC"
             )
@@ -437,7 +424,7 @@ def owners_all():
 
 
 # -------------------------
-# Work items (你原本的)
+# Work items 
 # -------------------------
 @app.get("/api/work-items")
 def work_items():
@@ -536,7 +523,7 @@ def set_work_item_owners(work_item_id: int):
 
 
 # -------------------------
-# Auth (你原本的)
+# Auth
 # -------------------------
 @app.post("/api/auth/login")
 def admin_login():
@@ -580,7 +567,7 @@ def admin_me():
 
 
 # -------------------------
-# Comments (你原本的)
+# Comments 
 # -------------------------
 @app.get("/api/comments")
 def list_comments():
@@ -634,7 +621,7 @@ def list_comments():
 
 
 # -------------------------
-# ✅ API: 依姓名查到 id_no / 單位 (給 Web 端 autocomplete 或查詢)
+#  API: 依姓名查到 id_no / 單位
 # -------------------------
 @app.get("/api/people")
 def list_people():
@@ -681,9 +668,9 @@ def list_people():
 
 
 # -------------------------
-# ✅ API: 送留言 → LINE Push
-#     - 保留 owner_id (原本 owner_contacts 推播)
-#     - 新增 name / id_no (line_users 推播)
+#  API: 送留言 → LINE Push
+#     - 保留 owner_id 
+#     - 新增 name / id_no 
 # -------------------------
 @app.post("/api/messages")
 def send_message():
@@ -702,7 +689,7 @@ def send_message():
 
     conn = get_conn()
     try:
-        # 1) 原本的 owner_contacts：用 owner_id 推播
+        
         if owner_id:
             with conn.cursor() as cur:
                 cur.execute(
@@ -719,7 +706,7 @@ def send_message():
             line_push_text(owner["line_user_id"], content)
             return jsonify({"ok": True, "mode": "owner_id"})
 
-        # 2) 新的 line_users：用 id_no 或 name 推播
+        
         target = None
         if id_no:
             target = db_get_line_user_by_idno(conn, id_no)
@@ -742,10 +729,9 @@ def create_comment():
     data = request.get_json(force=True) or {}
     print("[DEBUG] /api/comments payload =", data)
 
-    # -------- 取值 + 清理 --------
     name = (data.get("name") or "").strip()
     contact = (data.get("contact") or "").strip()
-    email = (data.get("email") or "").strip()   # ✅ 一定要 strip
+    email = (data.get("email") or "").strip()  
     work_item_id = data.get("work_item_id")
     owner_id = data.get("owner_id")
     note = (data.get("note") or "").strip()
@@ -811,7 +797,7 @@ def create_comment():
                 msg = str(e)
                 print("[ERROR] INSERT comments failed:", msg)
 
-                # 你若尚未加 email 欄位，會在這邊炸 Unknown column
+                
                 if "Unknown column" in msg and "email" in msg:
                     return jsonify({
                         "ok": False,
@@ -819,7 +805,7 @@ def create_comment():
                         "hint_sql": "ALTER TABLE comments ADD COLUMN email VARCHAR(255) NOT NULL AFTER contact;"
                     }), 500
 
-                # 你若尚未加 contact 欄位（你以前寫過的除錯）
+                
                 if "Unknown column" in msg and "contact" in msg:
                     return jsonify({
                         "ok": False,
@@ -832,7 +818,7 @@ def create_comment():
             conn.commit()
             new_id = cur.lastrowid
 
-            # ---------- 撈回新增後完整資料 ----------
+            
             cur.execute(
                 """
                 SELECT
@@ -857,7 +843,7 @@ def create_comment():
             )
             created_row = cur.fetchone()
 
-        # ---------- 推播（用 owner_id -> owner_contacts.line_user_id）----------
+       
         line_result = {
             "attempted": True,
             "mode": "owner_id",
@@ -876,7 +862,7 @@ def create_comment():
             print("[LINE] skip:", line_result["message"])
         else:
             msg = (
-                "📩 新留言\n"
+                " 新留言\n"
                 f"事項：{created_row.get('work_item_title')}\n"
                 f"留言者：{name}\n"
                 f"聯絡方式：{contact}\n"
@@ -904,7 +890,7 @@ def get_owner_work_items():
     conn = get_conn()
     try:
         with conn.cursor() as cur:
-            # 把每個 owner 對應到多個 work_item 取回來
+           
             cur.execute("""
                 SELECT
                     oc.id AS owner_id,
@@ -921,7 +907,7 @@ def get_owner_work_items():
             """)
             rows = cur.fetchall()
 
-        # ---- 組成：一個 owner 一筆，works 是陣列 ----
+        
         owners_map = {}
         for r in rows:
             oid = r["owner_id"]
@@ -933,7 +919,7 @@ def get_owner_work_items():
                     "works": []
                 }
 
-            # LEFT JOIN 可能沒有工作（wi 欄位會是 None）
+            
             wid = r.get("work_item_id")
             if wid is not None:
                 owners_map[oid]["works"].append({
@@ -960,12 +946,12 @@ def notify():
         return jsonify({"error": "owner_id is required"}), 400
 
     try:
-        # 1️⃣ DB → email
+        #  DB → email
         send_to_email = get_owner_email(owner_id)
 
-        # 2️⃣ 寫 SharePoint（你之後接 Power Automate）
+        #
         create_sharepoint_item(
-            site_url="https://changgunguniversity-my.sharepoint.com/personal/xxx",
+            site_url="",
             list_name="TeamsNotifyList",
             title=title,
             message=message,
@@ -982,14 +968,14 @@ def notify():
 
         
 # -------------------------
-# ✅ LINE webhook：註冊 + 綁定
+#  LINE webhook：註冊 + 綁定
 # -------------------------
 @app.post("/api/line/webhook")
 def line_webhook():
     raw = request.get_data()  # bytes
     signature = request.headers.get("X-Line-Signature", "")
 
-    # 驗簽（建議開著；若你想先測，註解掉也可以）
+    
     if not verify_line_signature(raw, signature):
         return "bad signature", 400
 
@@ -1010,7 +996,7 @@ def line_webhook():
         reply_token = ev.get("replyToken")
         user_id = (ev.get("source") or {}).get("userId")
 
-        # 1) {Nickname}您好 → 回表單格式
+       
         m = HELLO_RE.match(text)
         if m:
             nickname = m.group(1)
@@ -1024,11 +1010,11 @@ def line_webhook():
             )
             continue
 
-        # 2) 使用者貼回表單 → 寫 DB + 綁 line_user_id（避免重複）
+        
         form = parse_register_form(text)
         if form:
             if not user_id:
-                reply_text(reply_token, "❌ 無法取得你的 LINE userId，請稍後再試")
+                reply_text(reply_token, " 無法取得你的 LINE userId，請稍後再試")
                 continue
 
             conn = get_conn()
@@ -1036,13 +1022,13 @@ def line_webhook():
                 # 你本人已經註冊過（line_user_id 已存在）
                 me = db_get_line_user_by_lineid(conn, user_id)
                 if me:
-                    reply_text(reply_token, "✅ 你已經註冊過了，不需要重複註冊")
+                    reply_text(reply_token, " 你已經註冊過了，不需要重複註冊")
                     continue
 
                 # 學號/工號是否重複
                 dup = db_get_line_user_by_idno(conn, form["id_no"])
                 if dup:
-                    reply_text(reply_token, f"❌ 學號/工號已存在（已被 {dup['name']} 註冊）")
+                    reply_text(reply_token, f" 學號/工號已存在（已被 {dup['name']} 註冊）")
                     continue
 
                 # 寫入
@@ -1050,11 +1036,11 @@ def line_webhook():
                 db_insert_line_user(conn, None, form["name"], form["id_no"], form["unit"], user_id)
                 conn.commit()
 
-                reply_text(reply_token, "✅ 註冊成功！之後管理端可依姓名或學號/工號推播訊息給你。")
+                reply_text(reply_token, " 註冊成功！之後管理端可依姓名或學號/工號推播訊息給你。")
             except pymysql.err.IntegrityError:
                 # 保險：unique key 競態
                 conn.rollback()
-                reply_text(reply_token, "❌ 註冊失敗：資料可能已存在（請確認學號/工號是否重複）")
+                reply_text(reply_token, " 註冊失敗：資料可能已存在（請確認學號/工號是否重複）")
             finally:
                 conn.close()
             continue
@@ -1074,4 +1060,4 @@ def line_webhook():
 
 if __name__ == "__main__":
     ensure_tables()
-    app.run(host="127.0.0.1", port=8000, debug=True)
+    app.run(host="", port=, debug=True)
