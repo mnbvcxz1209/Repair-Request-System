@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API_BASE = "http://127.0.0.1:8000/api"; // 後端 8000
+const API_BASE = ""; 
 
 export default function CommentPage() {
     const [workItems, setWorkItems] = useState([]); // {id,title}
@@ -13,15 +13,15 @@ export default function CommentPage() {
     const [form, setForm] = useState({
         name: "",
         contact: "",        // 聯絡方式
-        email: "",          // ✅ 新增：電子郵件
+        email: "",          // 
         work_item_id: "",
         owner_id: "",
-        note: "",           // 備註(留言) 可空
+        note: "",           // 備註
     });
 
     const [errors, setErrors] = useState({});
 
-    // 1) 進頁面：抓事項下拉
+    // 1) 進頁面：事項下拉
     useEffect(() => {
         (async () => {
             try {
@@ -39,7 +39,7 @@ export default function CommentPage() {
         })();
     }, []);
 
-    // 2) 選事項後：抓該事項對應負責人（掛勾）
+    // 2) 選事項後：該事項對應負責人
     useEffect(() => {
         const wid = form.work_item_id;
         if (!wid) {
@@ -70,7 +70,7 @@ export default function CommentPage() {
     const onChange = (key) => (e) => {
         const value = e.target.value;
 
-        // 切換事項時，清空 owner_id（避免殘留不相容）
+        // 切換事項時
         if (key === "work_item_id") {
             setForm((p) => ({ ...p, work_item_id: value, owner_id: "" }));
             setErrors((p) => ({ ...p, work_item_id: "", owner_id: "" }));
@@ -81,7 +81,7 @@ export default function CommentPage() {
         setErrors((p) => ({ ...p, [key]: "" }));
     };
 
-    // ✅ 除了備註(note)以外：所有欄位不可空 + email 格式檢查
+    //  除了備註(note)以外：所有欄位不可空 + email 格式檢查
     const validate = () => {
         const next = {};
         if (!form.name.trim()) next.name = "請輸入姓名";
@@ -100,18 +100,18 @@ export default function CommentPage() {
         return Object.keys(next).length === 0;
     };
 
-    // ✅ 送出留言（POST /api/comments）
+    //  送出留言（POST /api/comments）
     const handleSubmit = async () => {
         if (!validate()) return;
 
         const payload = {
             name: form.name.trim(),
             contact: form.contact.trim(),
-            email: form.email.trim(), // ✅ 新增
+            email: form.email.trim(), 
             work_item_id: Number(form.work_item_id),
             owner_id: Number(form.owner_id),
-            note: (form.note || "").trim(), // 可空
-            notify_name: "test", // 你目前後端沒用到它，留著也不影響
+            note: (form.note || "").trim(), 
+            notify_name: "test", 
         };
 
         try {
@@ -133,7 +133,7 @@ export default function CommentPage() {
 
             if (created?.line_push?.attempted) {
                 if (created?.line_push?.ok) {
-                    alert("送出成功，LINE 已通知 / Sent successfully ");
+                    alert("送出成功 / Sent successfully ");
                 } else {
                     alert(
                         `送出成功，但 LINE 通知失敗：${created?.line_push?.message || created?.line_push?.error || ""
@@ -148,7 +148,7 @@ export default function CommentPage() {
             setForm({
                 name: "",
                 contact: "",
-                email: "", // ✅
+                email: "", // 
                 work_item_id: "",
                 owner_id: "",
                 note: "",
@@ -190,7 +190,7 @@ export default function CommentPage() {
                     {errors.contact && <div style={{ color: "crimson", marginTop: 6 }}>{errors.contact}</div>}
                 </div>
 
-                {/* ✅ 新增：電子郵件 */}
+                {/*  電子郵件 */}
                 <div>
                     <div>電子郵件 / Email *</div>
                     <input
