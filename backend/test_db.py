@@ -19,8 +19,8 @@ try:
         database=os.getenv("DB_NAME"),
         charset="utf8mb4",
     )
-    print("✅ MySQL 連線成功")
+    print(" MySQL 連線成功")
     conn.close()
 except Exception as e:
-    print("❌ MySQL 連線失敗：")
+    print(" MySQL 連線失敗：")
     print(e)
