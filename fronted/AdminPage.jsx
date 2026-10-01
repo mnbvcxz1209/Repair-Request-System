@@ -85,7 +85,7 @@ export default function AdminPage() {
             })
             setNewTitle("")
             await loadItems()
-            setMsg("✅ 已新增工作內容")
+            setMsg(" 已新增工作內容")
         } catch (e) {
             setErr(e.message || String(e))
         } finally {
@@ -94,7 +94,7 @@ export default function AdminPage() {
     }
 
     async function onDeleteWorkItem(id) {
-        if (!confirm("確定要刪除這個工作內容？（會連帶刪掉關聯）")) return
+        if (!confirm("確定要刪除這個工作內容？）")) return
         try {
             setMsg("")
             setErr("")
@@ -102,7 +102,7 @@ export default function AdminPage() {
             await apiJson(`${API}/api/work-items/${id}`, { method: "DELETE" })
             if (String(selectedItemId) === String(id)) setSelectedItemId("")
             await loadItems()
-            setMsg("✅ 已刪除工作內容")
+            setMsg(" 已刪除工作內容")
         } catch (e) {
             setErr(e.message || String(e))
         } finally {
