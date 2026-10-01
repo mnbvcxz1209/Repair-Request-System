@@ -33,7 +33,6 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 這一層套用 Layout */}
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/owner" element={<OwnerQueryPage />} />
