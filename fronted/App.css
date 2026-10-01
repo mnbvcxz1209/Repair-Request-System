@@ -1,0 +1,162 @@
+/* =========================
+   Reset
+========================= */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang TC", "Microsoft JhengHei", Arial, sans-serif;
+  background-color: #f9fafb;
+}
+
+/* =========================
+   Navbar
+========================= */
+.navbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+/* =========================
+   Main Layout
+========================= */
+.main {
+  min-height: calc(100vh - 56px);
+  width: 100vw;
+  /* ✅ 關鍵：撐滿整個視窗寬度 */
+}
+
+.main.center {
+  display: grid;
+  place-items: center;
+  /* 水平 + 垂直置中 */
+}
+
+/* =========================
+   Home Card（整塊內容）
+========================= */
+.home-container {
+  background: #ffffff;
+  padding: 48px 56px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  min-width: 360px;
+}
+
+/* =========================
+   標題與文字
+========================= */
+.title {
+  font-size: 40px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 16px;
+  margin-bottom: 32px;
+  color: #6b7280;
+}
+
+/* =========================
+   按鈕
+========================= */
+.button-group {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.button-group button {
+  padding: 12px 28px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.button-group button:hover {
+  background-color: #1d4ed8;
+}
+
+/* =========================
+   通用頁面外框（非首頁）
+========================= */
+.page-shell {
+  padding: 32px 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 920px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  padding: 28px;
+}
+
+.page-title {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.page-subtitle {
+  margin: 0 0 18px 0;
+  color: #6b7280;
+}
+
+/* =========================
+   簡易表格（div 版）
+========================= */
+.table {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.tr {
+  display: grid;
+  grid-template-columns: 1fr 1fr 120px;
+  gap: 0;
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.tr:first-child {
+  border-top: none;
+}
+
+.tr.head {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.th,
+.td {
+  padding: 14px 16px;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
