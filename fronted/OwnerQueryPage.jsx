@@ -13,7 +13,7 @@ export default function OwnerQueryPage() {
                 setLoading(true);
                 setError("");
 
-                // ✅ 改成抓「負責人 + 工作」
+                // 負責人 + 工作
                 const res = await fetch(`${API_BASE}/owner-work-items`);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -49,7 +49,7 @@ export default function OwnerQueryPage() {
                             <div className="tr" key={p.id}>
                                 <div className="td">{p.name}</div>
 
-                                {/* ✅ 工作：用 work_item_owners 對照出來 */}
+                                {/*  工作 */}
                                 <div className="td">
                                     {Array.isArray(p.works) && p.works.length > 0 ? (
                                         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
