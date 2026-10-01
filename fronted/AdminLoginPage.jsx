@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
-const API = "http://127.0.0.1:8000" // 或你已改 localhost
+const API = "" 
 
 export default function AdminLoginPage() {
     const [username, setUsername] = useState("admin")
